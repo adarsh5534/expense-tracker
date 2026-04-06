@@ -3,12 +3,15 @@ import { AppLogo } from "@/components/brand/app-logo";
 import { EnvVarWarning } from "@/components/env-var-warning";
 import { ThemeSwitcher } from "@/components/theme-switcher";
 import { hasEnvVars } from "@/lib/utils";
+import { UserEmail } from "@/components/app/user-email";
+import { NavigationProgress } from "@/components/navigation-progress";
 import Link from "next/link";
 import { Suspense } from "react";
 
-export function AppShell({ children }: { children: React.ReactNode }) {
+export default function AppShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex min-h-svh flex-col bg-background">
+      <NavigationProgress />
       <header className="sticky top-0 z-10 border-b border-border/80 bg-background/80 backdrop-blur-md">
         <div className="mx-auto flex h-14 max-w-4xl items-center justify-between gap-4 px-4">
           <div className="flex min-w-0 items-center gap-6">
@@ -21,6 +24,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             </Link>
           </div>
           <div className="flex items-center gap-2 sm:gap-3">
+            <Suspense fallback={<span className="h-5 w-24 animate-pulse rounded-md bg-muted" />}>
+              <UserEmail />
+            </Suspense>
             <ThemeSwitcher />
             {!hasEnvVars ? (
               <EnvVarWarning />

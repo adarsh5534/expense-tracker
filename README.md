@@ -1,12 +1,12 @@
 # Expense Tracker
 
-A production-ready expense tracking app built with **Next.js (App Router)**, **Supabase (Auth + Postgres)**, and **Tailwind CSS**.
+A full-stack expense tracking app built with **Next.js 15**, **Supabase**, and **Tailwind CSS**.
 
 ## Tech Stack
 
 | Layer | Technology |
 |---|---|
-| Framework | Next.js (App Router) |
+| Framework | Next.js 15 (App Router) |
 | Backend | Supabase (Auth + PostgreSQL) |
 | Language | TypeScript |
 | Styling | Tailwind CSS |
@@ -23,55 +23,23 @@ A production-ready expense tracking app built with **Next.js (App Router)**, **S
 ## Project Structure
 
 ```
-app/
-  (app)/                              # Authenticated app routes (dashboard + org pages)
-    layout.tsx
-    dashboard/page.tsx
-    organization/[id]/page.tsx
-  auth/                               # Auth routes (login, sign-up, reset, confirm)
-    layout.tsx
-    login/page.tsx
-    sign-up/page.tsx
-    sign-up-success/page.tsx
-    forgot-password/page.tsx
-    update-password/page.tsx
-    confirm/route.ts
-    error/page.tsx
-  actions/                            # Server Actions (mutations)
-    organizations.ts
-    expenses.ts
-  protected/                          # Simple protected route (redirects to /dashboard)
-    layout.tsx
-    page.tsx
-  layout.tsx                           # Root layout (ThemeProvider)
-  page.tsx                             # Landing page
-
-components/
-  app/app-shell.tsx                  # Authenticated header + footer
-  layout/public-shell.tsx            # Public header + footer
-  brand/app-logo.tsx
-  forms/
-    create-organization-form.tsx
-    expense-form.tsx
-  ui/                                # shadcn/ui components
-
-lib/
-  auth.ts                             # requireUser() helper
-  supabase/
-    client.ts                         # Browser client
-    server.ts                         # Server client
-    proxy.ts                          # Session/cookie proxy for Next.js 16
-    env.ts                            # Env var helpers (includes ANON key fallback)
-
-services/
-  organizations.ts                     # Supabase read queries
-  expenses.ts                          # Supabase read queries
-
-supabase/
-  migrations/
-    001_expense_tracker.sql          # Organizations + expenses + RLS policies
-
-proxy.ts                                # Next.js 16 proxy entrypoint
+├── app/
+│   ├── (app)/                    # Protected routes (dashboard, org pages)
+│   ├── auth/                     # Auth pages (login, sign-up, password reset)
+│   ├── actions/                  # Server Actions (expenses, organizations)
+│   ├── protected/               # Placeholder protected route
+│   ├── layout.tsx               # Root layout with ThemeProvider
+│   └── page.tsx                 # Landing page
+├── lib/
+│   └── supabase/
+│       ├── client.ts            # Browser client (createBrowserClient)
+│       ├── server.ts            # Server client (createServerClient)
+│       └── env.ts               # Env var helpers
+├── components/
+│   ├── ui/                      # shadcn/ui components
+│   └── tutorial/                # Tutorial steps (sign-up, connect-supabase, etc.)
+├── middleware.ts                # Auth middleware (cookie-based sessions)
+└── proxy.ts                     # Supabase proxy for local dev (optional)
 ```
 
 ## Setup
@@ -89,13 +57,13 @@ In your Supabase project dashboard, go to **Settings → API** and copy:
 
 ### 3. Configure Environment Variables
 
-Create a `.env.local` file (values copied from your Supabase project settings):
+Create a `.env.local` file:
 
 ```env
 NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
-# Optional fallback key (some starter templates use this name)
-NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=your-publishable-key
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=your-publishable-key  # optional (Supabase dashboard may provide this instead)
+NEXT_PUBLIC_LOCAL_REDIRECT_URL=http://localhost:3000/**
 ```
 
 ### 4. Configure Supabase Auth URLs
@@ -143,8 +111,8 @@ In your **Vercel project dashboard → Settings → Environment Variables**, add
 ```
 NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
-# Optional fallback key
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=your-publishable-key
+NEXT_PUBLIC_LOCAL_REDIRECT_URL=http://localhost:3000/**
 ```
 
 ### Configure Supabase for Production
@@ -154,8 +122,8 @@ In **Supabase Dashboard → Authentication → URL Configuration**:
 - **Site URL**: `https://your-vercel-app.vercel.app`
 - **Redirect URLs**:
   ```
-  https://your-vercel-app.vercel.app/
-  https://your-vercel-app.vercel.app/** 
+  http://localhost:3000/**
+  https://your-vercel-app.vercel.app/**
   ```
 
 ### Set Up DNS (Custom Domain - optional)
@@ -168,8 +136,8 @@ If using a custom domain, add it in **Vercel → Domains** and configure DNS rec
 2. Supabase sends a confirmation email with a link
 3. User clicks the link → hits `/auth/confirm` route
 4. `route.ts` calls `supabase.auth.verifyOtp()` to verify the token
-5. User is redirected to `/dashboard` (or the `next` param)
-6. `proxy.ts` (Next.js 16) uses the Supabase auth cookie to protect `/dashboard` and `/organization/*`
+5. User is redirected to `/` (or the `next` param)
+6. Middleware reads the auth cookie to protect routes
 
 ### Email Confirmation URL Format
 
@@ -179,15 +147,13 @@ https://your-app.vercel.app/auth/confirm?token_hash=XXX&type=signup&next=/
 
 ## Database Schema
 
-Run Supabase SQL migration:
+Tables are managed via Supabase migrations. Key tables:
 
-- `supabase/migrations/001_expense_tracker.sql`
+- `profiles` — user profiles
+- `organizations` — expense groups
+- `expenses` — individual expense records
 
-This creates:
-
-- `organizations` (id, name, owner_id)
-- `expenses` (id, title, amount, category, organization_id)
-- RLS policies so users can only access their own organizations/expenses.
+Refer to Supabase Dashboard → **Table Editor** for full schema.
 
 ## Scripts
 

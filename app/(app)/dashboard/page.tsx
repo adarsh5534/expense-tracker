@@ -13,7 +13,9 @@ import { listOrganizations } from "@/services/organizations";
 import { Building2 } from "lucide-react";
 import Link from "next/link";
 
-export default async function DashboardPage() {
+import { Suspense } from "react";
+
+async function DashboardContent() {
   const { supabase } = await requireUser();
   const organizations = await listOrganizations(supabase);
 
@@ -29,7 +31,7 @@ export default async function DashboardPage() {
           work, personal use, or anything else.
         </p>
       </div>
-
+      
       <Card className="border-border/80 shadow-sm">
         <CardHeader>
           <CardTitle className="text-lg">New organization</CardTitle>
@@ -74,5 +76,13 @@ export default async function DashboardPage() {
         )}
       </section>
     </div>
+  );
+}
+
+export default function DashboardPage() {
+  return (
+    <Suspense fallback={<div>Loading dashboard...</div>}>
+      <DashboardContent />
+    </Suspense>
   );
 }

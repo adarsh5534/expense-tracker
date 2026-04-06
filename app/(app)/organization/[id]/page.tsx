@@ -35,12 +35,9 @@ function formatDate(iso: string) {
   }
 }
 
-export default async function OrganizationPage({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
-  const { id } = await params;
+import { Suspense } from "react";
+
+async function OrganizationContent({ id }: { id: string }) {
   const { supabase } = await requireUser();
 
   const organization = await getOrganizationById(supabase, id);
@@ -141,5 +138,19 @@ export default async function OrganizationPage({
         )}
       </section>
     </div>
+  );
+}
+
+export default async function OrganizationPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
+
+  return (
+    <Suspense fallback={<div>Loading workspace...</div>}>
+      <OrganizationContent id={id} />
+    </Suspense>
   );
 }

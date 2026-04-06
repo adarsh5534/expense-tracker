@@ -2,9 +2,29 @@
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useActionState } from "react";
 
 type State = { error: string | null } | null;
+
+const CATEGORIES = [
+  "Food & Dining",
+  "Transportation",
+  "Shopping",
+  "Entertainment",
+  "Bills & Utilities",
+  "Health",
+  "Travel",
+  "Education",
+  "Personal Care",
+  "Other",
+];
 
 export function ExpenseForm({
   organizationId,
@@ -55,12 +75,18 @@ export function ExpenseForm({
           <label htmlFor="expense-category" className="text-sm font-medium">
             Category <span className="font-normal text-muted-foreground">(optional)</span>
           </label>
-          <Input
-            id="expense-category"
-            name="category"
-            placeholder="Food"
-            disabled={pending}
-          />
+          <Select name="category" disabled={pending}>
+            <SelectTrigger id="expense-category">
+              <SelectValue placeholder="Select category" />
+            </SelectTrigger>
+            <SelectContent>
+              {CATEGORIES.map((cat) => (
+                <SelectItem key={cat} value={cat}>
+                  {cat}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       </div>
       {state?.error ? (
